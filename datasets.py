@@ -22,12 +22,15 @@ def get_batch_iterator(config, init_key, eval=False, val=False):
       return ([X_val[0]], [t[0]], [X_val[-1]], [t[-1]])
   elif config.data.test_id is not None:
     assert config.data.test_id < (len(X_train)-1) and config.data.test_id > 0
+    # Eagerly remove the held-out marginal so training never sees it
+    X_held = X_train.pop(config.data.test_id)
+    t_held = t.pop(config.data.test_id)
+    # Source for eval is the marginal just before the held-out one
+    src_idx = config.data.test_id - 1  # index in the now-shorter list
     def test_iterator():
-      return ([X_train[config.data.test_id-1]], [t[config.data.test_id-1]], 
-              [X_train.pop(config.data.test_id)], [t.pop(config.data.test_id)])
+      return ([X_train[src_idx]], [t[src_idx]], [X_held], [t_held])
     def val_iterator():
-      return ([X_train[config.data.test_id-1]], [t[config.data.test_id-1]], 
-              [X_train.pop(config.data.test_id)], [t.pop(config.data.test_id)])
+      return ([X_train[src_idx]], [t[src_idx]], [X_held], [t_held])
   else: 
     def test_iterator():
       return (X_test[:-1], t[:-1], X_test[1:], t[1:])

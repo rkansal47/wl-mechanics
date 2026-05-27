@@ -7,6 +7,8 @@ def get_config():
   config.seed = 0
   config.loss = 'ubot'
   config.interpolant = 'linear'
+  config.metric = 'w1'
+  config.lambd = 0.1
 
   # data
   config.data = data = ml_collections.ConfigDict()

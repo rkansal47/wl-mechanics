@@ -69,7 +69,7 @@ def get_step_fn(config, optimizer_s, optimizer_q, loss_fn):
     def update(optimizer, grad, state, every=1):
       updates, opt_state = optimizer.update(grad, state.opt_state, state.model_params)
       new_params = optax.apply_updates(state.model_params, updates)
-      new_params_ema = jax.tree_map(
+      new_params_ema = jax.tree.map(
         lambda p_ema, p: p_ema * state.ema_rate + p * (1. - state.ema_rate),
         state.params_ema, new_params
       )
@@ -84,7 +84,7 @@ def get_step_fn(config, optimizer_s, optimizer_q, loss_fn):
       
     grads = jax.lax.pmean(grads, axis_name='batch')
     loss = jax.lax.pmean(loss, axis_name='batch')
-    metrics = jax.tree_map(lambda _metric: jax.lax.pmean(_metric, axis_name='batch'), metrics)
+    metrics = jax.tree.map(lambda _metric: jax.lax.pmean(_metric, axis_name='batch'), metrics)
     
     new_state_s = update(optimizer_s, grads[0], state_s)
     new_state_q = update(optimizer_q, grads[1], state_q)
