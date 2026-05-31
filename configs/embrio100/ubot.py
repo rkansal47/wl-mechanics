@@ -5,26 +5,28 @@ def get_config():
   config = ml_collections.ConfigDict()
 
   config.seed = 0
-  config.loss = 'rf'
-  config.interpolant = 'ot'
+  config.loss = 'ubot'
+  config.interpolant = 'linear'
+  config.metric = 'w1'
+  config.lambd = 0.1
 
   # data
   config.data = data = ml_collections.ConfigDict()
   data.task = 'OT'
   data.name = 'embrio'
-  data.dim = 5
-  data.whiten = True
+  data.dim = 100
+  data.whiten = False
   data.test_id = 1
   data.t_0, data.t_1 = 0.0, 1.0
 
-  # models
+  # models (architecture from cite50 — suited for higher-dim inputs)
   config.model_s = model_s = ml_collections.ConfigDict()
   model_s.input_dim = data.dim
   model_s.name = 'mlp_s'
   model_s.ema_rate = 0.999
   model_s.nonlinearity = 'swish'
   model_s.nf = 512
-  model_s.n_layers = 2
+  model_s.n_layers = 3
   model_s.skip = False
   model_s.embed_time = True
   model_s.dropout = 0.0
@@ -36,9 +38,9 @@ def get_config():
   model_q.ema_rate = 0.999
   model_q.nonlinearity = 'swish'
   model_q.nf = 512
-  model_q.n_layers = 0
+  model_q.n_layers = 1
   model_q.skip = False
-  model_q.indicator = True
+  model_q.indicator = False
   model_q.dropout = 0.0
 
   # opts
@@ -57,7 +59,7 @@ def get_config():
   optimizer_q.eps = 1e-8
   optimizer_q.warmup = 5_000
   optimizer_q.grad_clip = 1.
-  
+
   # training
   config.train = train = ml_collections.ConfigDict()
   train.batch_size = 512
@@ -66,7 +68,7 @@ def get_config():
   train.n_jitted_steps = 1
   train.n_iters = 100_000
   train.save_every = 200_000
-  train.eval_every = 10_000
+  train.eval_every = 50_000
   train.log_every = 50
 
   # evaluation
